@@ -36,6 +36,9 @@ def bing_api(method, url, data=None):
 
 
 def driving_distance(unordered_coordinates):
+    if len(unordered_coordinates) == 1:
+        return 0, {}
+
     params = {f"waypoint.{index + 1}": f"{c[0]},{c[1]}" for index, c in enumerate(unordered_coordinates)}
     params['optimizeWaypoints'] = True
     params['optimize'] = 'timeWithTraffic'

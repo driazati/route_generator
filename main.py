@@ -3,7 +3,8 @@ import csv
 import pprint
 import pickle
 import random
-# from sklearn.cluster import KMeans
+import numpy as np
+from sklearn.cluster import KMeans
 from geopy.distance import great_circle
 # import matplotlib.pyplot as plt
 # from sklearn.cluster import DBSCAN
@@ -73,11 +74,12 @@ print("skipped (address was bad):", num_bad_addresses)
 print("calculating routes for:", len(requesters))
 
 # calculate distance matrix
-print("calculating distances")
+print("calculating distances...")
 for r in requesters:
     r['distances'] = []
     for other_r in requesters:
         r["distances"].append(great_circle(r["coords"], other_r["coords"]).km)
+print("\tdone")
 
 
 def group_requesters():
@@ -162,14 +164,47 @@ for i in range(ITERATIONS):
     print("\tMin score: ", min_score)
 
 
+
+
+
 locations_by_idx = []
 lats = []
 lons = []
+
 
 for r in requesters:
     locations_by_idx.append([r["coords"].lat, r["coords"].lon])
     lats.append(r["coords"].lat)
     lons.append(r["coords"].lon)
+
+
+# Run kmeans
+# num_clusters = int(len(requesters) / GROUP_SIZE)
+# kmeans = KMeans(n_clusters=num_clusters, random_state=0).fit(np.array(locations_by_idx))
+
+# potential_groups = [[] for i in range(num_clusters)]
+
+# for index, group_index in enumerate(kmeans.labels_):
+#     potential_groups[group_index].append(index)
+
+
+# some of the groups at this point are too big and need to be split up
+# groups = []
+# for potential_group in potential_groups:
+#     if len(potential_group) <= GROUP_SIZE:
+#         groups.append(potential_group)
+#     else:
+#         curr = 0
+#         while curr < len(potential_group):
+#             partial_group = potential_group[curr:curr + GROUP_SIZE]
+#             groups.append(partial_group)
+#             curr += GROUP_SIZE
+
+
+
+# dont split the groups
+# groups = potential_groups
+
 
 
 def make_colors():
@@ -252,15 +287,22 @@ def average_coords(coords):
 
 for group in groups:
     waypoints = [requesters[i]['coords'] for i in group]
+    if len(waypoints) > 20:
+        print("Skipping group that is too big")
+        continue
     travel_time_minutes, data = driving_distance(waypoints)
     print('\n')
 
     print(f"Driving distance: {round(travel_time_minutes, 2)} min")
 
-    order = [int(x.replace('wp.', '')) for x in data['waypointsOrder']]
+    if 'waypointsOrder' not in data:
+        order = [i for i in range(len(group))]
+    else:
+        order = [int(x.replace('wp.', '')) for x in data['waypointsOrder']]
     for i, ordered_index in enumerate(order):
-        r = requesters[group[ordered_index]]
+        idx = group[ordered_index]
+        r = requesters[idx]
         print(f"{i}. {r['row']['Computed Address']}")
-        if i < len(order) - 1:
+        if travel_time_minutes > 0 and i < len(order) - 1:
             travel_time_from_last_waypoint_minutes = data['routeLegs'][i]['travelDuration'] / 60
             print(f"\t{round(travel_time_from_last_waypoint_minutes, 2)} minutes")
