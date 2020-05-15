@@ -23,6 +23,14 @@ echo "bing_api_key = '<YOUR API KEY>' > secret.py"
 
 ## Run
 
+Basic usage
+
 ```bash
 python3 main.py
+```
+
+Run and put the results into a file
+
+```bash
+python3 main.py > output.txt
 ```
