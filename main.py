@@ -1,25 +1,18 @@
-import os
 import collections
 import csv
-from math import radians, cos, sin, asin, sqrt
 import pprint
 import pickle
-import urllib.parse
 import random
-import numpy as np
-from sklearn.cluster import KMeans
+# from sklearn.cluster import KMeans
 from geopy.distance import great_circle
-import matplotlib
-import matplotlib.pyplot as plt
-import random
-from sklearn.cluster import DBSCAN
-from geopy.distance import great_circle
-from shapely.geometry import MultiPoint
+# import matplotlib.pyplot as plt
+# from sklearn.cluster import DBSCAN
+# from shapely.geometry import MultiPoint
+
+from helpers import *
 
 Coordinates = collections.namedtuple("Coordinates", ["lat", "lon"])
 
-
-from helpers import *
 
 # Parameters
 MIN_DELIVERY_WINDOW = 30
@@ -31,15 +24,13 @@ FIX_MISSING_ADDRESSES = False
 ITERATIONS = 500
 
 
-
-requesters = []
-
 addresses = pickle.load(open("addresses.pkl", "rb"))
 
 num_bad_addresses = 0
 num_total = 0
 num_with_recent_deliveries = 0
 
+requesters = []
 for row in csv.DictReader(open(ADDRESSES_FILE, "r")):
     num_total += 1
     if int(row["Days since delivery"]) < MIN_DELIVERY_WINDOW:
@@ -57,11 +48,11 @@ for row in csv.DictReader(open(ADDRESSES_FILE, "r")):
         if FIX_MISSING_ADDRESSES:
             print("Calling bing API")
             try:
-              coords = get_coords(STATE, CITY, address)
+                coords = get_coords(STATE, CITY, address)
             except:
-              print("Failed to get", address)
-              num_bad_addresses += 1
-              continue
+                print("Failed to get", address)
+                num_bad_addresses += 1
+                continue
         else:
             num_bad_addresses += 1
             continue
@@ -72,7 +63,6 @@ for row in csv.DictReader(open(ADDRESSES_FILE, "r")):
 
 pickle.dump(addresses, open("addresses.pkl", "wb"))
 
-
 print(" ======= stats =======")
 print("total entries:", num_total)
 print(
@@ -81,8 +71,6 @@ print(
 )
 print("skipped (address was bad):", num_bad_addresses)
 print("calculating routes for:", len(requesters))
-
-
 
 # calculate distance matrix
 print("calculating distances")
@@ -174,8 +162,6 @@ for i in range(ITERATIONS):
     print("\tMin score: ", min_score)
 
 
-
-
 locations_by_idx = []
 lats = []
 lons = []
@@ -184,9 +170,6 @@ for r in requesters:
     locations_by_idx.append([r["coords"].lat, r["coords"].lon])
     lats.append(r["coords"].lat)
     lons.append(r["coords"].lon)
-
-
-fig, ax = plt.subplots()
 
 
 def make_colors():
@@ -230,8 +213,9 @@ def revert_colors():
     return colors
 
 
-coll = ax.scatter(lats, lons, c=make_colors(), picker=0.01)
-artist = None
+# fig, ax = plt.subplots()
+# coll = ax.scatter(lats, lons, c=make_colors(), picker=0.01)
+# artist = None
 
 
 def on_pick(ev):
@@ -249,8 +233,8 @@ def press(event):
         fig.canvas.draw()
 
 
-fig.canvas.callbacks.connect("pick_event", on_pick)
-fig.canvas.mpl_connect("key_press_event", press)
+# fig.canvas.callbacks.connect("pick_event", on_pick)
+# fig.canvas.mpl_connect("key_press_event", press)
 
 # plt.show()
 
@@ -264,6 +248,7 @@ def average_coords(coords):
     avg_lon = avg_lon / len(coords)
 
     return avg_lat, avg_lon
+
 
 for group in groups:
     waypoints = [requesters[i]['coords'] for i in group]
@@ -279,4 +264,3 @@ for group in groups:
         if i < len(order) - 1:
             travel_time_from_last_waypoint_minutes = data['routeLegs'][i]['travelDuration'] / 60
             print(f"\t{round(travel_time_from_last_waypoint_minutes, 2)} minutes")
-
