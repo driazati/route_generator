@@ -28,6 +28,7 @@ STATE = "GA"
 CITY = "atlanta"
 ADDRESSES_FILE = "file.csv"
 FIX_MISSING_ADDRESSES = False
+ITERATIONS = 500
 
 
 
@@ -158,7 +159,7 @@ def rate(groups):
 # Randomly choose a set of groupings and rate it
 best_groups = None
 min_score = None
-for i in range(1):
+for i in range(ITERATIONS):
     print("Iteration:", i)
     groups = group_requesters()
     if best_groups is None:
