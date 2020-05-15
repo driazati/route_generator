@@ -1,24 +1,28 @@
 # Delivery Routes
 
+Generate fixed sized groupings of destinations
+
 ## Installation
 
-Get code
+1. Get code
 
 ```bash
 git clone https://github.com/driazati/route_generator.git
 cd route_generator
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 ```
 
-Set up Bing Maps API key
+2. Set up [Bing Maps API key](https://www.bingmapsportal.com/)
 
 Create a file called `secret.py` and add the key:
 ```bash
 echo "bing_api_key = '<YOUR API KEY>' > secret.py"
 ```
 
+3. Add `.csv` file to the folder, name it `file.csv`
+
 ## Run
 
 ```bash
-python main.py
+python3 main.py
 ```
