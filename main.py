@@ -21,6 +21,8 @@ FIX_MISSING_ADDRESSES = False
 GROUP_SIZE = 5
 
 
+# Load addresses that we have seen before so we don't have to go out to Bing
+# again
 addresses = pickle.load(open("addresses.pkl", "rb"))
 
 num_bad_addresses = 0
