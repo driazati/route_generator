@@ -18,6 +18,7 @@ STATE = "GA"
 CITY = "atlanta"
 ADDRESSES_FILE = "file.csv"
 FIX_MISSING_ADDRESSES = False
+GROUP_SIZE = 5
 
 
 addresses = pickle.load(open("addresses.pkl", "rb"))
@@ -67,7 +68,7 @@ pickle.dump(addresses, open("addresses.pkl", "wb"))
 print(" ======= stats =======")
 print("total entries:", num_total)
 print(
-    f"skipped (delivery was in the last {MIN_DELIVERY_WINDOW} days):",
+    f"skipped (delivery was in the last {MIN_DELIVERY_WINDOW_DAYS} days):",
     num_with_recent_deliveries,
 )
 print("skipped (address was bad):", num_bad_addresses)
@@ -78,11 +79,6 @@ print("calculating routes for:", len(requesters))
 locations_by_idx = [[r["coords"].lat, r["coords"].lon] for r in requesters]
 num_clusters = int(len(requesters) / GROUP_SIZE)
 kmeans = KMeans(n_clusters=num_clusters, random_state=0).fit(np.array(locations_by_idx))
-
-# groups = [[] for i in range(num_clusters)]
-
-# for index, group_index in enumerate(kmeans.labels_):
-#     groups[group_index].append(index)
 
 
 potential_groups = [[] for i in range(num_clusters)]
