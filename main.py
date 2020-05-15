@@ -79,18 +79,39 @@ locations_by_idx = [[r["coords"].lat, r["coords"].lon] for r in requesters]
 num_clusters = int(len(requesters) / GROUP_SIZE)
 kmeans = KMeans(n_clusters=num_clusters, random_state=0).fit(np.array(locations_by_idx))
 
-groups = [[] for i in range(num_clusters)]
+# groups = [[] for i in range(num_clusters)]
+
+# for index, group_index in enumerate(kmeans.labels_):
+#     groups[group_index].append(index)
+
+
+potential_groups = [[] for i in range(num_clusters)]
 
 for index, group_index in enumerate(kmeans.labels_):
-    groups[group_index].append(index)
+    potential_groups[group_index].append(index)
+
+
+# some of the groups at this point are too big for bing to handle and need to be split up
+groups = []
+
+# bing can't find a route between more than 25 destinations
+bing_route_max_size = 25
+for potential_group in potential_groups:
+    if len(potential_group) <= bing_route_max_size:
+        groups.append(potential_group)
+    else:
+        curr = 0
+        while curr < len(potential_group):
+            partial_group = potential_group[curr:curr + bing_route_max_size]
+            groups.append(partial_group)
+            curr += bing_route_max_size
 
 
 # Print out groups
 for group in groups:
     waypoints = [requesters[i]['coords'] for i in group]
-    if len(waypoints) > 20:
-        print("Skipping group that is too big")
-        continue
+    if len(waypoints) >= bing_route_max_size:
+        raise RuntimeError("Group was too big")
 
     # Find the drive time for the whole route
     travel_time_minutes, data = driving_distance(waypoints)
