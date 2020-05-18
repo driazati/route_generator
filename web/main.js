@@ -79,7 +79,7 @@ api_key_input.addEventListener('input', (e) => {
 });
 
 
-const BING_URL_BASE = "http://dev.virtualearth.net/REST/v1";
+const BING_URL_BASE = "https://dev.virtualearth.net/REST/v1";
 let request = `${BING_URL_BASE}/Locations/US/GA/atlanta/${encodeURIComponent("98 ardmore place nw 30309 atlanta ga")}`;
 
 
