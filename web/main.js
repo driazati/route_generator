@@ -175,7 +175,7 @@ class RouteGenerator {
       rows.push(data);
     });
 
-    let promise = new Promise((resolve, reject) => {
+    let promise = new Promise(async (resolve, reject) => {
       let requesters = [];
       for (let i = 0; i < rows.length; i++) {
         status.innerText = `getting address ${i + 1} / ${rows.length}`;

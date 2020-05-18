@@ -1,11 +1,21 @@
 body {
 	padding: 10px;
+background: rgb(168,168,168);
+background: radial-gradient(circle, rgba(168,168,168,1) 0%, rgba(242,253,255,1) 100%);
+
+background: rgb(34,193,195);
+background: linear-gradient(0deg, rgba(34,193,195,0.7651435574229692) 0%, rgba(253,187,45,0.6082808123249299) 100%);
 }
 
 pre {
 	margin-top: 10px;
-	background-color: rgba(0, 0, 0, 0.1);
+	background-color: rgba(220, 220, 220);
 	padding: 10px;
 	max-height: 700px;
 	overflow: scroll;
+}
+
+html, body {
+    margin: 0;
+    height: 100%;
 }
