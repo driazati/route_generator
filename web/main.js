@@ -195,7 +195,7 @@ class RouteGenerator {
           if (FIX_MISSING_ADDRESSES) {
             console.log("Fetching from bing for ", address);
             try {
-              // coords = await fetch_coordinates(state, city, address);
+              coords = await fetch_coordinates(state, city, address);
             } catch (e) {
               console.error("Could not fetch", address);
               console.error(e);
