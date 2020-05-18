@@ -1,0 +1,11 @@
+body {
+	padding: 10px;
+}
+
+pre {
+	margin-top: 10px;
+	background-color: rgba(0, 0, 0, 0.1);
+	padding: 10px;
+	max-height: 700px;
+	overflow: scroll;
+}

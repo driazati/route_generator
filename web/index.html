@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title></title>
+
+    <!-- <link rel="stylesheet" href="css/main.css" /> -->
+    <!-- <link rel="icon" href="images/favicon.png" /> -->
+    <script src="kMeans.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <link rel="stylesheet" href="main.css">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://d3js.org/d3-dsv.v1.min.js"></script>
+    <script src="https://d3js.org/d3-fetch.v1.min.js"></script>
+  </head>
+
+  <body>
+    <h1>Route Generator</h1>
+    <p>Upload an AirTable .csv file to see automatic route groupings</p>
+
+    <div class="form-group">
+      <label for="bing_api_key">Bing Maps API Key</label>
+      <input type="email" class="form-control" id="bing_api_key">
+      <small id="emailHelp" class="form-text text-muted">Needed to calculate driving distances <a href="https://www.bingmapsportal.com/">Create one here</a></small>
+    </div>
+    <input id="file" disabled type="file" class="btn btn-primary" accept=".csv">
+    <button id="calculate" type="button" disabled class="btn btn-info">Calculate groupings</button>
+    <button id="clipboard" type="button" class="btn btn-info">Copy to clipboard</button>
+
+    <div><span> Status: </span><span style="display: inline-block;" id='status'>no file chosen</span>
+
+    <pre id="groups"></pre>
+    <script src="main.js"></script>
+  </body>
+</html>
