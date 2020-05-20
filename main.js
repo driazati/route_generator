@@ -281,6 +281,7 @@ class RouteGenerator {
     const pre = document.getElementById('groups');
     let text = '';
     status.innerText = 'optimizing routes';
+    this.numGroups = groups.length;
     for (let i = 0; i < groups.length; i++) {
       const group = groups[i];
       if (group.length > MAX_GROUP_SIZE) {
@@ -320,7 +321,7 @@ class RouteGenerator {
           obj.num_routes_calculated += 1;
           status.innerText = `calculating route ${obj.num_routes_calculated} / ${groups.length}`
           if (obj.num_routes_calculated == groups.length) {
-            status.innerText = `done (mean: ${+math.mean(obj.drivingTimes).toFixed(2)} median: ${+math.median(obj.drivingTimes).toFixed(2)})`;
+            status.innerText = `made ${obj.numGroups} groups (mean: ${+math.mean(obj.drivingTimes).toFixed(2)} median: ${+math.median(obj.drivingTimes).toFixed(2)})`;
 
           }
           text += '<br>';
