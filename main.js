@@ -11,6 +11,14 @@ document.getElementById('clipboard').addEventListener('click', e => {
   navigator.clipboard.writeText(document.getElementById('groups').innerText);
 });
 
+function escapeHtml(unsafe) {
+    return unsafe
+         .replace(/&/g, "&amp;")
+         .replace(/</g, "&lt;")
+         .replace(/>/g, "&gt;")
+         .replace(/"/g, "&quot;")
+         .replace(/'/g, "&#039;");
+ }
 
 
 document.getElementById('file').addEventListener('change',  (e) =>{
@@ -97,6 +105,10 @@ function fetch_coordinates(state, city, address) {
   })
 }
 
+function timeout(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 function drivingDistance(waypoints) {
   if (waypoints.length == 1) {
     return new Promise((resolve, reject) => {
@@ -117,7 +129,16 @@ function drivingDistance(waypoints) {
   const request = `${BING_URL_BASE}/Routes/Driving`;
 
   return new Promise((resolve, reject) => {
-    CallRestService(request, urlParams, (data) => {
+    CallRestService(request, urlParams, async (data) => {
+      if (data.statusCode && data.statusCode == 429) {
+        // too many requests error, wait a bit and try again
+        console.log("Too many requests, retrying...")
+        await timeout(2000 + Math.floor(Math.random() * 10000));
+        drivingDistance(waypoints).then((data) => {
+          resolve(data);
+        });
+        return;
+      }
       const resource = data.resourceSets[0].resources[0];
       const response = {
         totalTravelTime: resource.travelDurationTraffic / 60,
@@ -134,6 +155,9 @@ function drivingDistance(waypoints) {
           const waypoint = resource.waypointsOrder[i];
           response.waypoints.push(parseInt(waypoint.replace('wp.', '')));
         }
+      } else if (waypoints.length == 2) {
+        response.waypoints.push(0);
+        response.waypoints.push(1);
       }
 
       resolve(response);
@@ -186,7 +210,11 @@ class RouteGenerator {
           this.num_with_recent_deliveries +=1 ;
           continue;
         }
-        const address = row['Computed Address'];
+        let address = row['Computed Address'];
+        address = address.trim();
+        address = address.replace(/(,$)/g, "");
+        address = address.replace('\n', " ");
+        row['Computed Address'] = address;
         let coords = null;
         if (address in address_cache) {
           // Cached entry for this address was found, use it
@@ -197,12 +225,12 @@ class RouteGenerator {
             try {
               coords = await fetch_coordinates(state, city, address);
             } catch (e) {
-              console.error("Could not fetch", address);
-              console.error(e);
+              // console.error("Could not fetch", address);
+              // console.error(e);
             }
           }
           if (!coords) {
-            // console.error("Skipped", address);
+            console.error("Skipped", address);
             this.num_bad_addresses += 1;
             continue;
           }
@@ -266,25 +294,38 @@ class RouteGenerator {
         waypoints.push(requester.coords);
       }
 
+      let routeUrl = 'https://bing.com/maps/default.aspx?rtp=';
+      this.drivingTimes = [];
+
       (function(waypoints, group, obj) {
         drivingDistance(waypoints).then((response) => {
-          let text = `Total travel time: ${+response.totalTravelTime.toFixed(2)} min\n`;
+          let text = `<a href="ROUTE_PLACEHOLDER">Total travel time: ${+response.totalTravelTime.toFixed(2)} min</a><br>`;
+          obj.drivingTimes.push(response.totalTravelTime);
           for (let j = 0; j < response.waypoints.length; j++) {
             const waypointIndex = response.waypoints[j];
             const requester = requesters[group[waypointIndex]];
+
+            routeUrl += 'adr.' + encodeURIComponent(requester.row['Computed Address']);
+            if (j < response.waypoints.length - 1) {
+              routeUrl += '~';
+            }
+
             // waypoints.push(requester.coords);
-            text += `${j + 1}: ${requester.row['Computed Address']} (${requester.coords})\n`;
+            text += `${j + 1}: ${escapeHtml(requester.row['Computed Address'])}<br>`;
+            // text += `${j + 1}: ${escapeHtml(requester.row['Computed Address'])} (${requester.coords})<br>`;
             if (j < group.length - 1) {
-              text += `\t${+response.legs[j].toFixed(2)} min\n`
+              text += `<span class="time">${+response.legs[j].toFixed(2)} min</span><br>`
             }
           }
           obj.num_routes_calculated += 1;
           status.innerText = `calculating route ${obj.num_routes_calculated} / ${groups.length}`
           if (obj.num_routes_calculated == groups.length) {
-            status.innerText = 'done';
+            status.innerText = `done (mean: ${+math.mean(obj.drivingTimes).toFixed(2)} median: ${+math.median(obj.drivingTimes).toFixed(2)})`;
+
           }
-          text += '\n';
-          pre.innerText += text;
+          text += '<br>';
+          text = text.replace('ROUTE_PLACEHOLDER', routeUrl);
+          pre.innerHTML += text;
         });
       })(waypoints, group, this);
     }
